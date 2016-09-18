@@ -3,6 +3,7 @@ package com.vise.basebluetooth.thread;
 import android.bluetooth.BluetoothSocket;
 
 import com.vise.basebluetooth.BluetoothChatHelper;
+import com.vise.basebluetooth.common.ChatConstant;
 import com.vise.basebluetooth.utils.BleLog;
 
 import java.io.IOException;
@@ -14,14 +15,14 @@ import java.io.OutputStream;
  * @author: <a href="http://www.xiaoyaoyou1212.com">DAWI</a>
  * @date: 2016-09-13 18:38
  */
-public class MessageThread extends Thread {
+public class ConnectedThread extends Thread {
 
     private BluetoothChatHelper mHelper;
     private final BluetoothSocket mSocket;
     private final InputStream mInStream;
     private final OutputStream mOutStream;
 
-    public MessageThread(BluetoothChatHelper bluetoothChatHelper, BluetoothSocket socket, String socketType) {
+    public ConnectedThread(BluetoothChatHelper bluetoothChatHelper, BluetoothSocket socket, String socketType) {
         BleLog.d("create ConnectedThread: " + socketType);
         mHelper = bluetoothChatHelper;
         mSocket = socket;
@@ -47,7 +48,7 @@ public class MessageThread extends Thread {
         while (true) {
             try {
                 bytes = mInStream.read(buffer);
-                mHelper.getHandler().obtainMessage(BluetoothChatHelper.MESSAGE_READ, bytes, -1, buffer).sendToTarget();
+                mHelper.getHandler().obtainMessage(ChatConstant.MESSAGE_READ, bytes, -1, buffer).sendToTarget();
             } catch (IOException e) {
                 BleLog.e("disconnected", e);
                 mHelper.connectionLost();
@@ -60,7 +61,7 @@ public class MessageThread extends Thread {
     public void write(byte[] buffer) {
         try {
             mOutStream.write(buffer);
-            mHelper.getHandler().obtainMessage(BluetoothChatHelper.MESSAGE_WRITE, -1, -1, buffer).sendToTarget();
+            mHelper.getHandler().obtainMessage(ChatConstant.MESSAGE_WRITE, -1, -1, buffer).sendToTarget();
         } catch (IOException e) {
             BleLog.e("Exception during write", e);
         }

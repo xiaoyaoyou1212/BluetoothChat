@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 
 import com.vise.basebluetooth.BluetoothChatHelper;
+import com.vise.basebluetooth.common.ChatConstant;
 import com.vise.basebluetooth.utils.BleLog;
 
 import java.io.IOException;
@@ -15,9 +16,6 @@ import java.util.UUID;
  * @date: 2016-09-13 17:58
  */
 public class ConnectThread extends Thread {
-
-    private static final UUID UUID_SECURE = UUID.fromString("fa87c0d0-afac-11de-8a39-0800200c9a66");
-    private static final UUID UUID_INSECURE = UUID.fromString("8ce255c0-200a-11e0-ac64-0800200c9a66");
 
     private BluetoothChatHelper mHelper;
     private final BluetoothSocket mSocket;
@@ -32,9 +30,9 @@ public class ConnectThread extends Thread {
 
         try {
             if (secure) {
-                tmp = device.createRfcommSocketToServiceRecord(UUID_SECURE);
+                tmp = device.createRfcommSocketToServiceRecord(ChatConstant.UUID_SECURE);
             } else {
-                tmp = device.createInsecureRfcommSocketToServiceRecord(UUID_INSECURE);
+                tmp = device.createInsecureRfcommSocketToServiceRecord(ChatConstant.UUID_INSECURE);
             }
         } catch (IOException e) {
             BleLog.e("Socket Type: " + mSocketType + "create() failed", e);
@@ -51,7 +49,6 @@ public class ConnectThread extends Thread {
         try {
             mSocket.connect();
         } catch (IOException e) {
-            // Close the socket
             try {
                 mSocket.close();
             } catch (IOException e2) {

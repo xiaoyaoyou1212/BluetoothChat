@@ -4,10 +4,10 @@ import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
 
 import com.vise.basebluetooth.BluetoothChatHelper;
+import com.vise.basebluetooth.common.ChatConstant;
 import com.vise.basebluetooth.utils.BleLog;
 
 import java.io.IOException;
-import java.util.UUID;
 
 /**
  * @Description:
@@ -16,13 +16,8 @@ import java.util.UUID;
  */
 public class AcceptThread extends Thread {
 
-    private static final String NAME_SECURE = "BluetoothChatSecure";
-    private static final String NAME_INSECURE = "BluetoothChatInsecure";
-    private static final UUID UUID_SECURE = UUID.fromString("fa87c0d0-afac-11de-8a39-0800200c9a66");
-    private static final UUID UUID_INSECURE = UUID.fromString("8ce255c0-200a-11e0-ac64-0800200c9a66");
-
     private BluetoothChatHelper mHelper;
-    private final BluetoothServerSocket mmServerSocket;
+    private final BluetoothServerSocket mServerSocket;
     private String mSocketType;
 
     public AcceptThread(BluetoothChatHelper bluetoothChatHelper, boolean secure) {
@@ -32,14 +27,14 @@ public class AcceptThread extends Thread {
 
         try {
             if (secure) {
-                tmp = mHelper.getAdapter().listenUsingRfcommWithServiceRecord(NAME_SECURE, UUID_SECURE);
+                tmp = mHelper.getAdapter().listenUsingRfcommWithServiceRecord(ChatConstant.NAME_SECURE, ChatConstant.UUID_SECURE);
             } else {
-                tmp = mHelper.getAdapter().listenUsingInsecureRfcommWithServiceRecord(NAME_INSECURE, UUID_INSECURE);
+                tmp = mHelper.getAdapter().listenUsingInsecureRfcommWithServiceRecord(ChatConstant.NAME_INSECURE, ChatConstant.UUID_INSECURE);
             }
         } catch (IOException e) {
             BleLog.e("Socket Type: " + mSocketType + "listen() failed", e);
         }
-        mmServerSocket = tmp;
+        mServerSocket = tmp;
     }
 
     public void run() {
@@ -48,30 +43,27 @@ public class AcceptThread extends Thread {
 
         BluetoothSocket socket = null;
 
-        while (mHelper.getState() != BluetoothChatHelper.STATE_CONNECTED) {
+        while (mHelper.getState() != com.vise.basebluetooth.common.State.STATE_CONNECTED) {
             try {
                 BleLog.e("wait new socket");
-                socket = mmServerSocket.accept();
+                socket = mServerSocket.accept();
             } catch (IOException e) {
                 BleLog.e("Socket Type: " + mSocketType + "accept() failed", e);
                 break;
             }
             if (socket != null) {
                 synchronized (this) {
-                    switch (mHelper.getState()) {
-                        case BluetoothChatHelper.STATE_LISTEN:
-                        case BluetoothChatHelper.STATE_CONNECTING:
-                            BleLog.e("mark CONNECTING");
-                            mHelper.connected(socket, socket.getRemoteDevice(), mSocketType);
-                            break;
-                        case BluetoothChatHelper.STATE_NONE:
-                        case BluetoothChatHelper.STATE_CONNECTED:
-                            try {
-                                socket.close();
-                            } catch (IOException e) {
-                                BleLog.e("Could not close unwanted socket", e);
-                            }
-                            break;
+                    if(mHelper.getState() == com.vise.basebluetooth.common.State.STATE_LISTEN
+                            || mHelper.getState() == com.vise.basebluetooth.common.State.STATE_CONNECTING){
+                        BleLog.e("mark CONNECTING");
+                        mHelper.connected(socket, socket.getRemoteDevice(), mSocketType);
+                    } else if(mHelper.getState() == com.vise.basebluetooth.common.State.STATE_NONE
+                            || mHelper.getState() == com.vise.basebluetooth.common.State.STATE_CONNECTED){
+                        try {
+                            socket.close();
+                        } catch (IOException e) {
+                            BleLog.e("Could not close unwanted socket", e);
+                        }
                     }
                 }
             }
@@ -82,7 +74,7 @@ public class AcceptThread extends Thread {
     public void cancel() {
         BleLog.d("Socket Type" + mSocketType + "cancel " + this);
         try {
-            mmServerSocket.close();
+            mServerSocket.close();
         } catch (IOException e) {
             BleLog.e("Socket Type" + mSocketType + "close() of server failed", e);
         }

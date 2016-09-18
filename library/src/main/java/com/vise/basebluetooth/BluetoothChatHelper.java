@@ -3,14 +3,17 @@ package com.vise.basebluetooth;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
-import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 
+import com.vise.basebluetooth.callback.IChatCallback;
+import com.vise.basebluetooth.common.ChatConstant;
+import com.vise.basebluetooth.common.State;
 import com.vise.basebluetooth.thread.AcceptThread;
 import com.vise.basebluetooth.thread.ConnectThread;
-import com.vise.basebluetooth.thread.MessageThread;
+import com.vise.basebluetooth.thread.ConnectedThread;
 import com.vise.basebluetooth.utils.BleLog;
 
 /**
@@ -21,34 +24,56 @@ import com.vise.basebluetooth.utils.BleLog;
 public class BluetoothChatHelper {
 
     private final BluetoothAdapter mAdapter;
-    private final Handler mHandler;
     private AcceptThread mSecureAcceptThread;
     private AcceptThread mInsecureAcceptThread;
     private ConnectThread mConnectThread;
-    private MessageThread mMessageThread;
-    private int mState;
+    private ConnectedThread mConnectedThread;
+    private State mState;
+    private IChatCallback mChatCallback;
 
-    public static final int STATE_NONE = 0;
-    public static final int STATE_LISTEN = 1;
-    public static final int STATE_CONNECTING = 2;
-    public static final int STATE_CONNECTED = 3;
+    private final Handler mHandler = new Handler(Looper.getMainLooper()) {
+        @Override
+        public void handleMessage(Message msg) {
+            if (msg == null || msg.obj == null) {
+                return;
+            }
+            switch (msg.what) {
+                case ChatConstant.MESSAGE_STATE_CHANGE:
+                    if (mChatCallback != null) {
+                        mChatCallback.connectStateChange((State) msg.obj);
+                    }
+                    break;
+                case ChatConstant.MESSAGE_WRITE:
+                    if (mChatCallback != null) {
+                        mChatCallback.writeData((byte[]) msg.obj, 0);
+                    }
+                    break;
+                case ChatConstant.MESSAGE_READ:
+                    if (mChatCallback != null) {
+                        mChatCallback.readData((byte[]) msg.obj, 0);
+                    }
+                    break;
+                case ChatConstant.MESSAGE_DEVICE_NAME:
+                    if (mChatCallback != null) {
+                        mChatCallback.setDeviceName((String) msg.obj);
+                    }
+                    break;
+                case ChatConstant.MESSAGE_TOAST:
+                    if (mChatCallback != null) {
+                        mChatCallback.showMessage((String) msg.obj, 0);
+                    }
+                    break;
+            }
+        }
+    };
 
-    public static final int MESSAGE_STATE_CHANGE = 1;
-    public static final int MESSAGE_READ = 2;
-    public static final int MESSAGE_WRITE = 3;
-    public static final int MESSAGE_DEVICE_NAME = 4;
-    public static final int MESSAGE_TOAST = 5;
-
-    public static final String DEVICE_NAME = "device_name";
-    public static final String TOAST = "toast";
-
-    public BluetoothChatHelper(Context context, Handler handler) {
+    public BluetoothChatHelper(IChatCallback chatCallback) {
         mAdapter = BluetoothAdapter.getDefaultAdapter();
-        mState = STATE_NONE;
-        mHandler = handler;
+        mState = State.STATE_NONE;
+        this.mChatCallback = chatCallback;
     }
 
-    public synchronized int getState() {
+    public synchronized State getState() {
         return mState;
     }
 
@@ -64,9 +89,9 @@ public class BluetoothChatHelper {
         return mSecureAcceptThread;
     }
 
-    private synchronized BluetoothChatHelper setState(int state) {
+    private synchronized BluetoothChatHelper setState(State state) {
         mState = state;
-        mHandler.obtainMessage(MESSAGE_STATE_CHANGE, state, -1).sendToTarget();
+        mHandler.obtainMessage(ChatConstant.MESSAGE_STATE_CHANGE, -1, -1, state).sendToTarget();
         return this;
     }
 
@@ -93,12 +118,12 @@ public class BluetoothChatHelper {
         return this;
     }
 
-    public MessageThread getMessageThread() {
-        return mMessageThread;
+    public ConnectedThread getConnectedThread() {
+        return mConnectedThread;
     }
 
-    public BluetoothChatHelper setMessageThread(MessageThread mMessageThread) {
-        this.mMessageThread = mMessageThread;
+    public BluetoothChatHelper setConnectedThread(ConnectedThread mConnectedThread) {
+        this.mConnectedThread = mConnectedThread;
         return this;
     }
 
@@ -109,12 +134,12 @@ public class BluetoothChatHelper {
             mConnectThread = null;
         }
 
-        if (mMessageThread != null) {
-            mMessageThread.cancel();
-            mMessageThread = null;
+        if (mConnectedThread != null) {
+            mConnectedThread.cancel();
+            mConnectedThread = null;
         }
 
-        setState(STATE_LISTEN);
+        setState(State.STATE_LISTEN);
 
         if (mSecureAcceptThread == null) {
             BleLog.d("mSecureAcceptThread start");
@@ -130,21 +155,21 @@ public class BluetoothChatHelper {
 
     public synchronized void connect(BluetoothDevice device, boolean secure) {
         BleLog.d("connect to: " + device);
-        if (mState == STATE_CONNECTING) {
+        if (mState == State.STATE_CONNECTING) {
             if (mConnectThread != null) {
                 mConnectThread.cancel();
                 mConnectThread = null;
             }
         }
 
-        if (mMessageThread != null) {
-            mMessageThread.cancel();
-            mMessageThread = null;
+        if (mConnectedThread != null) {
+            mConnectedThread.cancel();
+            mConnectedThread = null;
         }
 
         mConnectThread = new ConnectThread(this, device, secure);
         mConnectThread.start();
-        setState(STATE_CONNECTING);
+        setState(State.STATE_CONNECTING);
     }
 
     public synchronized void connected(BluetoothSocket socket,
@@ -155,9 +180,9 @@ public class BluetoothChatHelper {
             mConnectThread = null;
         }
 
-        if (mMessageThread != null) {
-            mMessageThread.cancel();
-            mMessageThread = null;
+        if (mConnectedThread != null) {
+            mConnectedThread.cancel();
+            mConnectedThread = null;
         }
 
         if (mSecureAcceptThread != null) {
@@ -169,16 +194,11 @@ public class BluetoothChatHelper {
             mInsecureAcceptThread = null;
         }
 
-        mMessageThread = new MessageThread(this, socket, socketType);
-        mMessageThread.start();
+        mConnectedThread = new ConnectedThread(this, socket, socketType);
+        mConnectedThread.start();
 
-        Message msg = mHandler.obtainMessage(MESSAGE_DEVICE_NAME);
-        Bundle bundle = new Bundle();
-        bundle.putString(DEVICE_NAME, device.getName());
-        msg.setData(bundle);
-        mHandler.sendMessage(msg);
-
-        setState(STATE_CONNECTED);
+        mHandler.obtainMessage(ChatConstant.MESSAGE_DEVICE_NAME, -1, -1, device.getName()).sendToTarget();
+        setState(State.STATE_CONNECTED);
     }
 
     public synchronized void stop() {
@@ -188,9 +208,9 @@ public class BluetoothChatHelper {
             mConnectThread = null;
         }
 
-        if (mMessageThread != null) {
-            mMessageThread.cancel();
-            mMessageThread = null;
+        if (mConnectedThread != null) {
+            mConnectedThread.cancel();
+            mConnectedThread = null;
         }
 
         if (mSecureAcceptThread != null) {
@@ -202,34 +222,26 @@ public class BluetoothChatHelper {
             mInsecureAcceptThread.cancel();
             mInsecureAcceptThread = null;
         }
-        setState(STATE_NONE);
+        setState(State.STATE_NONE);
     }
 
     public void write(byte[] out) {
-        MessageThread r;
+        ConnectedThread r;
         synchronized (this) {
-            if (mState != STATE_CONNECTED)
+            if (mState != State.STATE_CONNECTED)
                 return;
-            r = mMessageThread;
+            r = mConnectedThread;
         }
         r.write(out);
     }
 
     public void connectionFailed() {
-        Message msg = mHandler.obtainMessage(MESSAGE_TOAST);
-        Bundle bundle = new Bundle();
-        bundle.putString(TOAST, "Unable to connect device");
-        msg.setData(bundle);
-        mHandler.sendMessage(msg);
+        mHandler.obtainMessage(ChatConstant.MESSAGE_TOAST, -1, -1, "Unable to connect device").sendToTarget();
         this.start();
     }
 
     public void connectionLost() {
-        Message msg = mHandler.obtainMessage(MESSAGE_TOAST);
-        Bundle bundle = new Bundle();
-        bundle.putString(TOAST, "Device connection was lost");
-        msg.setData(bundle);
-        mHandler.sendMessage(msg);
+        mHandler.obtainMessage(ChatConstant.MESSAGE_TOAST, -1, -1, "Device connection was lost").sendToTarget();
         this.start();
     }
 
