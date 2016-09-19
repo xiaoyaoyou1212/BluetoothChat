@@ -1,28 +1,17 @@
 package com.vise.basebluetooth.mode;
 
-import java.io.File;
-
 /**
- * @Description:
+ * @Description: 文件消息
  * @author: <a href="http://www.xiaoyaoyou1212.com">DAWI</a>
  * @date: 2016-09-19 15:10
  */
 public class FileMessage extends BaseMessage {
 
-    private File file;
     private String fileName;
-    private long fileLength;
+    private int fileLength;
+    private int fileNameLength;
 
     public FileMessage() {
-    }
-
-    public File getFile() {
-        return file;
-    }
-
-    public FileMessage setFile(File file) {
-        this.file = file;
-        return this;
     }
 
     public String getFileName() {
@@ -34,12 +23,30 @@ public class FileMessage extends BaseMessage {
         return this;
     }
 
-    public long getFileLength() {
+    public int getFileLength() {
         return fileLength;
     }
 
-    public FileMessage setFileLength(long fileLength) {
+    public FileMessage setFileLength(int fileLength) {
         this.fileLength = fileLength;
         return this;
+    }
+
+    public int getFileNameLength() {
+        return fileNameLength;
+    }
+
+    public FileMessage setFileNameLength(int fileNameLength) {
+        this.fileNameLength = fileNameLength;
+        return this;
+    }
+
+    @Override
+    public String toString() {
+        return "FileMessage{" +
+                "fileName='" + fileName + '\'' +
+                ", fileLength=" + fileLength +
+                ", fileNameLength=" + fileNameLength +
+                '}';
     }
 }

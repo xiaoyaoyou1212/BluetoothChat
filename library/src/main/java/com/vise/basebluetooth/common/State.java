@@ -1,7 +1,7 @@
 package com.vise.basebluetooth.common;
 
 /**
- * @Description:
+ * @Description: 状态
  * @author: <a href="http://www.xiaoyaoyou1212.com">DAWI</a>
  * @date: 16/9/18 20:37.
  */

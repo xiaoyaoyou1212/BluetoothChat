@@ -1,7 +1,7 @@
 package com.vise.basebluetooth.assemble;
 
 /**
- * @Description:
+ * @Description: 基础组装接口
  * @author: <a href="http://xiaoyaoyou1212.360doc.com">DAWI</a>
  * @date: 2016-09-19 15:39
  */

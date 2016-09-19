@@ -6,7 +6,7 @@ import com.vise.basebluetooth.utils.HexUtil;
 import java.nio.ByteBuffer;
 
 /**
- * @Description:
+ * @Description: 基础命令组装
  * @author: <a href="http://www.xiaoyaoyou1212.com">DAWI</a>
  * @date: 2016-09-19 15:42
  */

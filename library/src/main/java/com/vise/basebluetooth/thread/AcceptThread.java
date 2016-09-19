@@ -10,7 +10,7 @@ import com.vise.basebluetooth.utils.BleLog;
 import java.io.IOException;
 
 /**
- * @Description:
+ * @Description: 监听线程
  * @author: <a href="http://www.xiaoyaoyou1212.com">DAWI</a>
  * @date: 2016-09-13 17:57
  */

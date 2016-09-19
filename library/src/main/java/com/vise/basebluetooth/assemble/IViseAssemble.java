@@ -1,7 +1,7 @@
 package com.vise.basebluetooth.assemble;
 
 /**
- * @Description:
+ * @Description: 针对消息发送的组装接口
  * @author: <a href="http://xiaoyaoyou1212.360doc.com">DAWI</a>
  * @date: 2016-09-19 15:41
  */

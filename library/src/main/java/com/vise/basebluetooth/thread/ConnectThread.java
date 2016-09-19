@@ -8,10 +8,9 @@ import com.vise.basebluetooth.common.ChatConstant;
 import com.vise.basebluetooth.utils.BleLog;
 
 import java.io.IOException;
-import java.util.UUID;
 
 /**
- * @Description:
+ * @Description: 连接线程
  * @author: <a href="http://www.xiaoyaoyou1212.com">DAWI</a>
  * @date: 2016-09-13 17:58
  */

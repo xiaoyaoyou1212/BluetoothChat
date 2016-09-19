@@ -11,7 +11,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
- * @Description:
+ * @Description: 连接后维护线程
  * @author: <a href="http://www.xiaoyaoyou1212.com">DAWI</a>
  * @date: 2016-09-13 18:38
  */

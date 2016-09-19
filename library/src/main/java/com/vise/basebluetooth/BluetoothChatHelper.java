@@ -3,7 +3,6 @@ package com.vise.basebluetooth;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -17,7 +16,7 @@ import com.vise.basebluetooth.thread.ConnectedThread;
 import com.vise.basebluetooth.utils.BleLog;
 
 /**
- * @Description:
+ * @Description: 蓝牙消息处理帮助类
  * @author: <a href="http://www.xiaoyaoyou1212.com">DAWI</a>
  * @date: 2016-09-18 17:35
  */
@@ -67,7 +66,7 @@ public class BluetoothChatHelper {
         }
     };
 
-    public BluetoothChatHelper(IChatCallback chatCallback) {
+    public BluetoothChatHelper(IChatCallback<byte[]> chatCallback) {
         mAdapter = BluetoothAdapter.getDefaultAdapter();
         mState = State.STATE_NONE;
         this.mChatCallback = chatCallback;

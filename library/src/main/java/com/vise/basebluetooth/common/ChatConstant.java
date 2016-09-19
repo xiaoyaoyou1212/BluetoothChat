@@ -15,6 +15,7 @@ public class ChatConstant {
     public static final byte VISE_COMMAND_PROTOCOL_VERSION = (byte) 0x01;
 
     /*Send Command Type*/
+    public static final byte VISE_COMMAND_TYPE_NONE = (byte) 0x00;
     public static final byte VISE_COMMAND_TYPE_TEXT = (byte) 0x01;
     public static final byte VISE_COMMAND_TYPE_FILE = (byte) 0x02;
     public static final byte VISE_COMMAND_TYPE_IMAGE = (byte) 0x03;

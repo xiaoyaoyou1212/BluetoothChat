@@ -9,7 +9,7 @@ import com.vise.basebluetooth.utils.HexUtil;
 import java.nio.ByteBuffer;
 
 /**
- * @Description:
+ * @Description: 针对消息发送的命令组装
  * @author: <a href="http://www.xiaoyaoyou1212.com">DAWI</a>
  * @date: 2016-09-19 15:43
  */
@@ -38,11 +38,11 @@ public class ViseAssemble extends BaseAssemble implements IViseAssemble {
     public byte[] assembleCommand() {
         int length = 0;
         if(data != null){
-            length = 8 + data.length;
-            dataLength = ConvertUtil.intToBytesHigh(data.length, 4);
+            length = 6 + data.length;
+            dataLength = ConvertUtil.intToBytesHigh(data.length, 2);
         } else{
-            length = 8;
-            dataLength = ConvertUtil.intToBytesHigh(0, 4);
+            length = 6;
+            dataLength = ConvertUtil.intToBytesHigh(0, 2);
         }
         ByteBuffer buffer = ByteBuffer.allocate(length);
         buffer.put(startFlag);
