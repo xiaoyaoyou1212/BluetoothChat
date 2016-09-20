@@ -8,7 +8,7 @@ import java.util.List;
  * @date: 2016-09-13 18:50
  */
 public interface IScanCallback<T> {
-    void scanDiscover(T t);
-    void scanCancelDiscover(String msg);
+    void discoverDevice(T t);
+    void scanTimeout();
     void scanFinish(List<T> tList);
 }

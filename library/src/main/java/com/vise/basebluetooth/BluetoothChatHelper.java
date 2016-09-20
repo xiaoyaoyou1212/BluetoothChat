@@ -10,6 +10,7 @@ import android.os.Message;
 import com.vise.basebluetooth.callback.IChatCallback;
 import com.vise.basebluetooth.common.ChatConstant;
 import com.vise.basebluetooth.common.State;
+import com.vise.basebluetooth.mode.BaseMessage;
 import com.vise.basebluetooth.thread.AcceptThread;
 import com.vise.basebluetooth.thread.ConnectThread;
 import com.vise.basebluetooth.thread.ConnectedThread;
@@ -28,7 +29,7 @@ public class BluetoothChatHelper {
     private ConnectThread mConnectThread;
     private ConnectedThread mConnectedThread;
     private State mState;
-    private IChatCallback mChatCallback;
+    private IChatCallback<BaseMessage> mChatCallback;
 
     private final Handler mHandler = new Handler(Looper.getMainLooper()) {
         @Override
@@ -44,12 +45,12 @@ public class BluetoothChatHelper {
                     break;
                 case ChatConstant.MESSAGE_WRITE:
                     if (mChatCallback != null) {
-                        mChatCallback.writeData((byte[]) msg.obj, 0);
+                        mChatCallback.writeData((BaseMessage) msg.obj, 0);
                     }
                     break;
                 case ChatConstant.MESSAGE_READ:
                     if (mChatCallback != null) {
-                        mChatCallback.readData((byte[]) msg.obj, 0);
+                        mChatCallback.readData((BaseMessage) msg.obj, 0);
                     }
                     break;
                 case ChatConstant.MESSAGE_DEVICE_NAME:
@@ -66,7 +67,7 @@ public class BluetoothChatHelper {
         }
     };
 
-    public BluetoothChatHelper(IChatCallback<byte[]> chatCallback) {
+    public BluetoothChatHelper(IChatCallback<BaseMessage> chatCallback) {
         mAdapter = BluetoothAdapter.getDefaultAdapter();
         mState = State.STATE_NONE;
         this.mChatCallback = chatCallback;

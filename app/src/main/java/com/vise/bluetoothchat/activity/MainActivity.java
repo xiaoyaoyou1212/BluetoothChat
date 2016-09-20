@@ -1,8 +1,16 @@
-package com.vise.bluetoothchat;
+package com.vise.bluetoothchat.activity;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AppCompatCallback;
+import android.support.v7.app.AppCompatDelegate;
+import android.support.v7.view.ActionMode;
+import android.text.SpannableString;
+import android.text.method.LinkMovementMethod;
+import android.text.util.Linkify;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -12,10 +20,22 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ExpandableListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+import com.vise.bluetoothchat.R;
+import com.vise.bluetoothchat.adapter.FriendAdapter;
+import com.vise.bluetoothchat.adapter.GroupAdapter;
+import com.vise.common_base.activity.BaseActivity;
+import com.vise.common_base.utils.ToastUtil;
+
+public class MainActivity extends BaseActivity
+        implements AppCompatCallback,NavigationView.OnNavigationItemSelectedListener {
+
+    private ExpandableListView mFriendGroupList;
+    private GroupAdapter mGroupAdapter;
+    private FriendAdapter mFriendAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +66,8 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        mFriendGroupList = (ExpandableListView) findViewById(R.id.friend_group_list);
     }
 
     @Override
@@ -73,7 +95,11 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.menu_about) {
+            displayAboutDialog();
+            return true;
+        } else if(id == R.id.menu_share){
+            ToastUtil.showToast(mContext, getString(R.string.menu_share));
             return true;
         }
 
@@ -103,5 +129,45 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    public void setSupportActionBar(@Nullable Toolbar toolbar) {
+        AppCompatDelegate.create(this, this).setSupportActionBar(toolbar);
+    }
+
+    @Override
+    public void onSupportActionModeStarted(ActionMode mode) {
+    }
+
+    @Override
+    public void onSupportActionModeFinished(ActionMode mode) {
+    }
+
+    @Nullable
+    @Override
+    public ActionMode onWindowStartingSupportActionMode(ActionMode.Callback callback) {
+        return null;
+    }
+
+    private void displayAboutDialog() {
+        final int paddingSizeDp = 5;
+        final float scale = getResources().getDisplayMetrics().density;
+        final int dpAsPixels = (int) (paddingSizeDp * scale + 0.5f);
+
+        final TextView textView = new TextView(this);
+        final SpannableString text = new SpannableString(getString(R.string.about_dialog_text));
+
+        textView.setText(text);
+        textView.setAutoLinkMask(RESULT_OK);
+        textView.setMovementMethod(LinkMovementMethod.getInstance());
+        textView.setPadding(dpAsPixels, dpAsPixels, dpAsPixels, dpAsPixels);
+
+        Linkify.addLinks(text, Linkify.ALL);
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.menu_about)
+                .setCancelable(false)
+                .setPositiveButton(android.R.string.ok, null)
+                .setView(textView)
+                .show();
     }
 }
