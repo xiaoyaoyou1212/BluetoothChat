@@ -71,6 +71,15 @@ public class FriendInfo implements Serializable {
         return this;
     }
 
+    public boolean isOnline() {
+        return isOnline;
+    }
+
+    public FriendInfo setOnline(boolean online) {
+        isOnline = online;
+        return this;
+    }
+
     @Override
     public String toString() {
         return "FriendInfo{" +
@@ -80,6 +89,7 @@ public class FriendInfo implements Serializable {
                 ", deviceAddress='" + deviceAddress + '\'' +
                 ", identificationName='" + identificationName + '\'' +
                 ", joinTime='" + joinTime + '\'' +
+                ", isOnline=" + isOnline +
                 '}';
     }
 }

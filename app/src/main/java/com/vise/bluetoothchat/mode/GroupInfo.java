@@ -11,7 +11,8 @@ import java.util.List;
 public class GroupInfo implements Serializable {
 
     private int groupId;//ID
-    private int groupName;//名称
+    private int onlineNumber;//在线人数
+    private String groupName;//名称
     private List<FriendInfo> friendList;//该组好友列表
 
     public int getGroupId() {
@@ -23,11 +24,20 @@ public class GroupInfo implements Serializable {
         return this;
     }
 
-    public int getGroupName() {
+    public int getOnlineNumber() {
+        return onlineNumber;
+    }
+
+    public GroupInfo setOnlineNumber(int onlineNumber) {
+        this.onlineNumber = onlineNumber;
+        return this;
+    }
+
+    public String getGroupName() {
         return groupName;
     }
 
-    public GroupInfo setGroupName(int groupName) {
+    public GroupInfo setGroupName(String groupName) {
         this.groupName = groupName;
         return this;
     }
@@ -45,7 +55,8 @@ public class GroupInfo implements Serializable {
     public String toString() {
         return "GroupInfo{" +
                 "groupId=" + groupId +
-                ", groupName=" + groupName +
+                ", onlineNumber=" + onlineNumber +
+                ", groupName='" + groupName + '\'' +
                 ", friendList=" + friendList +
                 '}';
     }

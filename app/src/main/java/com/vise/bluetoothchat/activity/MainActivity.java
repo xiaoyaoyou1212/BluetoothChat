@@ -1,45 +1,59 @@
 package com.vise.bluetoothchat.activity;
 
+import android.app.Activity;
 import android.app.AlertDialog;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatCallback;
-import android.support.v7.app.AppCompatDelegate;
-import android.support.v7.view.ActionMode;
-import android.text.SpannableString;
-import android.text.method.LinkMovementMethod;
-import android.text.util.Linkify;
-import android.view.View;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.AppCompatCallback;
+import android.support.v7.app.AppCompatDelegate;
+import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
+import android.text.SpannableString;
+import android.text.method.LinkMovementMethod;
+import android.text.util.Linkify;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.BaseExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.vise.basebluetooth.utils.BluetoothUtil;
 import com.vise.bluetoothchat.R;
-import com.vise.bluetoothchat.adapter.FriendAdapter;
-import com.vise.bluetoothchat.adapter.GroupAdapter;
+import com.vise.bluetoothchat.adapter.GroupFriendAdapter;
+import com.vise.bluetoothchat.mode.FriendInfo;
+import com.vise.bluetoothchat.mode.GroupInfo;
 import com.vise.common_base.activity.BaseActivity;
+import com.vise.common_base.manager.AppManager;
 import com.vise.common_base.utils.ToastUtil;
+import com.vise.common_utils.utils.character.DateTime;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 public class MainActivity extends BaseActivity
         implements AppCompatCallback,NavigationView.OnNavigationItemSelectedListener {
 
-    private ExpandableListView mFriendGroupList;
-    private GroupAdapter mGroupAdapter;
-    private FriendAdapter mFriendAdapter;
+    private ExpandableListView mGroupFriendLv;
+    private GroupFriendAdapter mGroupFriendAdapter;
+    private List<GroupInfo> mGroupFriendListData = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        AppManager.getAppManager().addActivity(this);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -67,7 +81,44 @@ public class MainActivity extends BaseActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        mFriendGroupList = (ExpandableListView) findViewById(R.id.friend_group_list);
+        mGroupFriendLv = (ExpandableListView) findViewById(R.id.friend_group_list);
+        initData();
+    }
+
+    private void initData() {
+        mGroupFriendAdapter = new GroupFriendAdapter(mContext, mGroupFriendListData);
+        mGroupFriendLv.setAdapter(mGroupFriendAdapter);
+        mGroupFriendLv.expandGroup(0);
+        mGroupFriendLv.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
+            @Override
+            public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
+                ToastUtil.showToast(mContext, mGroupFriendListData.get(groupPosition).getFriendList().get(childPosition).getIdentificationName());
+                return true;
+            }
+        });
+        if(BluetoothUtil.isSupportBle(mContext)){
+            BluetoothUtil.enableBluetooth((Activity) mContext, 1);
+        } else{
+            ToastUtil.showToast(mContext, getString(R.string.phone_not_support_bluetooth));
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    AppManager.getAppManager().appExit(mContext);
+                }
+            }, 3000);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(requestCode == 1){
+            if(resultCode == RESULT_OK){
+                findDevice();
+            } else{
+                AppManager.getAppManager().appExit(mContext);
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
@@ -170,4 +221,28 @@ public class MainActivity extends BaseActivity
                 .setView(textView)
                 .show();
     }
+
+    private void findDevice(){
+        // 获得已经保存的配对设备
+        Set<BluetoothDevice> pairedDevices = BluetoothAdapter.getDefaultAdapter().getBondedDevices();
+        if (pairedDevices.size() > 0) {
+            GroupInfo groupInfo = new GroupInfo();
+            groupInfo.setGroupName(BluetoothAdapter.getDefaultAdapter().getName());
+            List<FriendInfo> friendInfoList = new ArrayList<>();
+            for (BluetoothDevice device : pairedDevices) {
+                FriendInfo friendInfo = new FriendInfo();
+                friendInfo.setIdentificationName(device.getName());
+                friendInfo.setDeviceAddress(device.getAddress());
+                friendInfo.setFriendNickName(device.getName());
+                friendInfo.setOnline(false);
+                friendInfo.setJoinTime(DateTime.getStringByFormat(new Date(), DateTime.DEFYMDHMS));
+                friendInfoList.add(friendInfo);
+            }
+            groupInfo.setFriendList(friendInfoList);
+            groupInfo.setOnlineNumber(0);
+            mGroupFriendListData.add(groupInfo);
+            mGroupFriendAdapter.setGroupInfoList(mGroupFriendListData);
+        }
+    }
+
 }

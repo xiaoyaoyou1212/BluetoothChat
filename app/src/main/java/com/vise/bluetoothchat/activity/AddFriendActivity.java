@@ -5,6 +5,7 @@ import android.os.Bundle;
 import com.vise.bluetoothchat.R;
 import com.vise.common_base.activity.BaseActivity;
 import com.vise.common_base.activity.BaseCustomBarActivity;
+import com.vise.common_base.manager.AppManager;
 
 /**
  * @Description:
@@ -15,6 +16,7 @@ public class AddFriendActivity extends BaseCustomBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        AppManager.getAppManager().addActivity(this);
         setContentView(R.layout.activity_add_friend);
     }
 }
