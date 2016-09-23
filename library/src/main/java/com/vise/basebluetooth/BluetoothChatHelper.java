@@ -24,8 +24,7 @@ import com.vise.basebluetooth.utils.BleLog;
 public class BluetoothChatHelper {
 
     private final BluetoothAdapter mAdapter;
-    private AcceptThread mSecureAcceptThread;
-    private AcceptThread mInsecureAcceptThread;
+    private AcceptThread mAcceptThread;
     private ConnectThread mConnectThread;
     private ConnectedThread mConnectedThread;
     private State mState;
@@ -85,27 +84,10 @@ public class BluetoothChatHelper {
         return mHandler;
     }
 
-    public AcceptThread getSecureAcceptThread() {
-        return mSecureAcceptThread;
-    }
 
     private synchronized BluetoothChatHelper setState(State state) {
         mState = state;
         mHandler.obtainMessage(ChatConstant.MESSAGE_STATE_CHANGE, -1, -1, state).sendToTarget();
-        return this;
-    }
-
-    public BluetoothChatHelper setSecureAcceptThread(AcceptThread mSecureAcceptThread) {
-        this.mSecureAcceptThread = mSecureAcceptThread;
-        return this;
-    }
-
-    public AcceptThread getInsecureAcceptThread() {
-        return mInsecureAcceptThread;
-    }
-
-    public BluetoothChatHelper setInsecureAcceptThread(AcceptThread mInsecureAcceptThread) {
-        this.mInsecureAcceptThread = mInsecureAcceptThread;
         return this;
     }
 
@@ -127,7 +109,7 @@ public class BluetoothChatHelper {
         return this;
     }
 
-    public synchronized void start() {
+    public synchronized void start(boolean secure) {
         BleLog.d("server start");
         if (mConnectThread != null) {
             mConnectThread.cancel();
@@ -141,15 +123,14 @@ public class BluetoothChatHelper {
 
         setState(State.STATE_LISTEN);
 
-        if (mSecureAcceptThread == null) {
-            BleLog.d("mSecureAcceptThread start");
-            mSecureAcceptThread = new AcceptThread(this, true);
-            mSecureAcceptThread.start();
-        }
-        if (mInsecureAcceptThread == null) {
-            BleLog.d("mInsecureAcceptThread start");
-            mInsecureAcceptThread = new AcceptThread(this, false);
-            mInsecureAcceptThread.start();
+        if (mAcceptThread == null) {
+            if(secure){
+                BleLog.d("mSecureAcceptThread start");
+            } else{
+                BleLog.d("mInsecureAcceptThread start");
+            }
+            mAcceptThread = new AcceptThread(this, secure);
+            mAcceptThread.start();
         }
     }
 
@@ -185,15 +166,6 @@ public class BluetoothChatHelper {
             mConnectedThread = null;
         }
 
-        if (mSecureAcceptThread != null) {
-            mSecureAcceptThread.cancel();
-            mSecureAcceptThread = null;
-        }
-        if (mInsecureAcceptThread != null) {
-            mInsecureAcceptThread.cancel();
-            mInsecureAcceptThread = null;
-        }
-
         mConnectedThread = new ConnectedThread(this, socket, socketType);
         mConnectedThread.start();
 
@@ -213,15 +185,11 @@ public class BluetoothChatHelper {
             mConnectedThread = null;
         }
 
-        if (mSecureAcceptThread != null) {
-            mSecureAcceptThread.cancel();
-            mSecureAcceptThread = null;
+        if (mAcceptThread != null) {
+            mAcceptThread.cancel();
+            mAcceptThread = null;
         }
 
-        if (mInsecureAcceptThread != null) {
-            mInsecureAcceptThread.cancel();
-            mInsecureAcceptThread = null;
-        }
         setState(State.STATE_NONE);
     }
 
@@ -237,12 +205,12 @@ public class BluetoothChatHelper {
 
     public void connectionFailed() {
         mHandler.obtainMessage(ChatConstant.MESSAGE_TOAST, -1, -1, "Unable to connect device").sendToTarget();
-        this.start();
+        this.start(false);
     }
 
     public void connectionLost() {
         mHandler.obtainMessage(ChatConstant.MESSAGE_TOAST, -1, -1, "Device connection was lost").sendToTarget();
-        this.start();
+        this.start(false);
     }
 
 }

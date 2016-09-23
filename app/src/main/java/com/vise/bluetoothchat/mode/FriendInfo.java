@@ -1,5 +1,7 @@
 package com.vise.bluetoothchat.mode;
 
+import android.bluetooth.BluetoothDevice;
+
 import java.io.Serializable;
 
 /**
@@ -16,6 +18,7 @@ public class FriendInfo implements Serializable {
     private String identificationName;//标识名称，即设备名称
     private String joinTime;//加入时间
     private boolean isOnline;//是否在线
+    private BluetoothDevice bluetoothDevice;
 
     public int getFriendId() {
         return friendId;
@@ -80,6 +83,15 @@ public class FriendInfo implements Serializable {
         return this;
     }
 
+    public BluetoothDevice getBluetoothDevice() {
+        return bluetoothDevice;
+    }
+
+    public FriendInfo setBluetoothDevice(BluetoothDevice bluetoothDevice) {
+        this.bluetoothDevice = bluetoothDevice;
+        return this;
+    }
+
     @Override
     public String toString() {
         return "FriendInfo{" +
@@ -90,6 +102,7 @@ public class FriendInfo implements Serializable {
                 ", identificationName='" + identificationName + '\'' +
                 ", joinTime='" + joinTime + '\'' +
                 ", isOnline=" + isOnline +
+                ", bluetoothDevice=" + bluetoothDevice +
                 '}';
     }
 }

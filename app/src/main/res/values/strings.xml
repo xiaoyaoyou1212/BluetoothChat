@@ -10,6 +10,17 @@
 
     <string name="device_online">在线</string>
     <string name="device_offline">离线</string>
+    <string name="device_unknown">Unknown</string>
+
+    <string name="add_friend">添加好友</string>
+    <string name="no_found_friend">附近没有发现好友！</string>
+    <string name="already_is_friend">已经是你好友了，不能重复添加！</string>
+    <string name="add_friend_loading">与好友配对中...</string>
+    <string name="add_friend_fail">添加好友失败！</string>
+    <string name="add_friend_success">添加好友成功！</string>
+    <string name="connect_friend_loading">与好友连接中...</string>
+    <string name="connect_friend_fail">连接失败！</string>
+    <string name="connect_friend_success">连接成功！</string>
 
     <string name="phone_not_support_bluetooth">该手机不支持蓝牙功能，3秒后应用将自动退出！</string>
 

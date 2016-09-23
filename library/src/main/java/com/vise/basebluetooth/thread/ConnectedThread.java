@@ -23,7 +23,7 @@ public class ConnectedThread extends Thread {
     private final OutputStream mOutStream;
 
     public ConnectedThread(BluetoothChatHelper bluetoothChatHelper, BluetoothSocket socket, String socketType) {
-        BleLog.d("create ConnectedThread: " + socketType);
+        BleLog.i("create ConnectedThread: " + socketType);
         mHelper = bluetoothChatHelper;
         mSocket = socket;
         InputStream tmpIn = null;
@@ -42,28 +42,36 @@ public class ConnectedThread extends Thread {
 
     public void run() {
         BleLog.i("BEGIN mConnectedThread");
-        byte[] buffer = new byte[1024];
+        int count = 0;
+        int haveCheck = 0;
         int bytes;
-
-        while (true) {
-            try {
-                bytes = mInStream.read(buffer);
-                mHelper.getHandler().obtainMessage(ChatConstant.MESSAGE_READ, bytes, -1, buffer).sendToTarget();
-            } catch (IOException e) {
-                BleLog.e("disconnected", e);
-                mHelper.connectionLost();
-                this.start();
-                break;
+        try{
+            // 如果在网络传输中数据没有完全传递，则方法返回0
+            while (count == 0) {
+                count = mInStream.available();
+                haveCheck++;
+                if (haveCheck >= 50)
+                    return;
             }
+            byte[] buffer = new byte[count];
+            bytes = mInStream.read(buffer);
+            mHelper.getHandler().obtainMessage(ChatConstant.MESSAGE_READ, bytes, -1, buffer).sendToTarget();
+        }catch (IOException e){
+            BleLog.e("disconnected", e);
+            mHelper.connectionLost();
+            this.start();
+            return;
         }
     }
 
     public void write(byte[] buffer) {
-        try {
-            mOutStream.write(buffer);
-            mHelper.getHandler().obtainMessage(ChatConstant.MESSAGE_WRITE, -1, -1, buffer).sendToTarget();
-        } catch (IOException e) {
-            BleLog.e("Exception during write", e);
+        if(mSocket.isConnected()){
+            try {
+                mOutStream.write(buffer);
+                mHelper.getHandler().obtainMessage(ChatConstant.MESSAGE_WRITE, -1, -1, buffer).sendToTarget();
+            } catch (IOException e) {
+                BleLog.e("Exception during write", e);
+            }
         }
     }
 

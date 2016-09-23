@@ -2,6 +2,7 @@ package com.vise.bluetoothchat.activity;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
@@ -10,7 +11,6 @@ import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -24,10 +24,13 @@ import android.text.util.Linkify;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.BaseExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
 
+import com.vise.basebluetooth.BluetoothChatHelper;
+import com.vise.basebluetooth.callback.IChatCallback;
+import com.vise.basebluetooth.common.State;
+import com.vise.basebluetooth.mode.BaseMessage;
 import com.vise.basebluetooth.utils.BluetoothUtil;
 import com.vise.bluetoothchat.R;
 import com.vise.bluetoothchat.adapter.GroupFriendAdapter;
@@ -36,6 +39,7 @@ import com.vise.bluetoothchat.mode.GroupInfo;
 import com.vise.common_base.activity.BaseActivity;
 import com.vise.common_base.manager.AppManager;
 import com.vise.common_base.utils.ToastUtil;
+import com.vise.common_utils.log.LogUtils;
 import com.vise.common_utils.utils.character.DateTime;
 
 import java.util.ArrayList;
@@ -46,9 +50,44 @@ import java.util.Set;
 public class MainActivity extends BaseActivity
         implements AppCompatCallback,NavigationView.OnNavigationItemSelectedListener {
 
+    private ProgressDialog mProgressDialog;
     private ExpandableListView mGroupFriendLv;
     private GroupFriendAdapter mGroupFriendAdapter;
     private List<GroupInfo> mGroupFriendListData = new ArrayList<>();
+    private BluetoothChatHelper mBluetoothChatHelper;
+
+    private IChatCallback<BaseMessage> chatCallback = new IChatCallback<BaseMessage>() {
+        @Override
+        public void connectStateChange(State state) {
+            LogUtils.i("connectStateChange:"+state.getCode());
+            if(state == State.STATE_CONNECTED){
+                mProgressDialog.hide();
+                ToastUtil.showToast(mContext, getString(R.string.connect_friend_success));
+            }
+        }
+
+        @Override
+        public void writeData(BaseMessage data, int type) {
+            LogUtils.i("writeData:"+data.toString());
+        }
+
+        @Override
+        public void readData(BaseMessage data, int type) {
+            LogUtils.i("readData:"+data.toString());
+        }
+
+        @Override
+        public void setDeviceName(String name) {
+            LogUtils.i("setDeviceName:"+name);
+        }
+
+        @Override
+        public void showMessage(String message, int code) {
+            LogUtils.i("showMessage:"+message);
+            mProgressDialog.hide();
+            ToastUtil.showToast(mContext, getString(R.string.connect_friend_fail));
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,13 +101,8 @@ public class MainActivity extends BaseActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-
-                            }
-                        }).show();
+                Intent intent = new Intent(mContext, AddFriendActivity.class);
+                startActivity(intent);
             }
         });
 
@@ -81,6 +115,7 @@ public class MainActivity extends BaseActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+        mProgressDialog = new ProgressDialog(mContext);
         mGroupFriendLv = (ExpandableListView) findViewById(R.id.friend_group_list);
         initData();
     }
@@ -92,10 +127,14 @@ public class MainActivity extends BaseActivity
         mGroupFriendLv.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
             @Override
             public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
-                ToastUtil.showToast(mContext, mGroupFriendListData.get(groupPosition).getFriendList().get(childPosition).getIdentificationName());
+                mProgressDialog.setMessage(getString(R.string.connect_friend_loading));
+                mProgressDialog.show();
+                mBluetoothChatHelper.connect(mGroupFriendListData.get(groupPosition).getFriendList().get(childPosition).getBluetoothDevice(), false);
                 return true;
             }
         });
+
+        mBluetoothChatHelper = new BluetoothChatHelper(chatCallback);
         if(BluetoothUtil.isSupportBle(mContext)){
             BluetoothUtil.enableBluetooth((Activity) mContext, 1);
         } else{
@@ -119,6 +158,22 @@ public class MainActivity extends BaseActivity
             }
         }
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    protected void onRestart() {
+        if(BluetoothUtil.isSupportBle(mContext)){
+            BluetoothUtil.enableBluetooth((Activity) mContext, 1);
+        } else{
+            ToastUtil.showToast(mContext, getString(R.string.phone_not_support_bluetooth));
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    AppManager.getAppManager().appExit(mContext);
+                }
+            }, 3000);
+        }
+        super.onRestart();
     }
 
     @Override
@@ -226,6 +281,7 @@ public class MainActivity extends BaseActivity
         // 获得已经保存的配对设备
         Set<BluetoothDevice> pairedDevices = BluetoothAdapter.getDefaultAdapter().getBondedDevices();
         if (pairedDevices.size() > 0) {
+            mGroupFriendListData.clear();
             GroupInfo groupInfo = new GroupInfo();
             groupInfo.setGroupName(BluetoothAdapter.getDefaultAdapter().getName());
             List<FriendInfo> friendInfoList = new ArrayList<>();
@@ -236,6 +292,7 @@ public class MainActivity extends BaseActivity
                 friendInfo.setFriendNickName(device.getName());
                 friendInfo.setOnline(false);
                 friendInfo.setJoinTime(DateTime.getStringByFormat(new Date(), DateTime.DEFYMDHMS));
+                friendInfo.setBluetoothDevice(device);
                 friendInfoList.add(friendInfo);
             }
             groupInfo.setFriendList(friendInfoList);
@@ -243,6 +300,7 @@ public class MainActivity extends BaseActivity
             mGroupFriendListData.add(groupInfo);
             mGroupFriendAdapter.setGroupInfoList(mGroupFriendListData);
         }
+        mBluetoothChatHelper.start(false);
     }
 
 }
