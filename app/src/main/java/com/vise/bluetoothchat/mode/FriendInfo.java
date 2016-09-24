@@ -1,6 +1,8 @@
 package com.vise.bluetoothchat.mode;
 
 import android.bluetooth.BluetoothDevice;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import java.io.Serializable;
 
@@ -9,7 +11,7 @@ import java.io.Serializable;
  * @author: <a href="http://www.xiaoyaoyou1212.com">DAWI</a>
  * @date: 2016-09-20 16:16
  */
-public class FriendInfo implements Serializable {
+public class FriendInfo implements Parcelable {
 
     private int friendId;//ID
     private String friendNickName;//昵称
@@ -19,6 +21,32 @@ public class FriendInfo implements Serializable {
     private String joinTime;//加入时间
     private boolean isOnline;//是否在线
     private BluetoothDevice bluetoothDevice;
+
+    public FriendInfo() {
+    }
+
+    protected FriendInfo(Parcel in) {
+        friendId = in.readInt();
+        friendNickName = in.readString();
+        friendIconUrl = in.readString();
+        deviceAddress = in.readString();
+        identificationName = in.readString();
+        joinTime = in.readString();
+        isOnline = in.readByte() != 0;
+        bluetoothDevice = in.readParcelable(BluetoothDevice.class.getClassLoader());
+    }
+
+    public static final Creator<FriendInfo> CREATOR = new Creator<FriendInfo>() {
+        @Override
+        public FriendInfo createFromParcel(Parcel in) {
+            return new FriendInfo(in);
+        }
+
+        @Override
+        public FriendInfo[] newArray(int size) {
+            return new FriendInfo[size];
+        }
+    };
 
     public int getFriendId() {
         return friendId;
@@ -104,5 +132,22 @@ public class FriendInfo implements Serializable {
                 ", isOnline=" + isOnline +
                 ", bluetoothDevice=" + bluetoothDevice +
                 '}';
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeInt(friendId);
+        parcel.writeString(friendNickName);
+        parcel.writeString(friendIconUrl);
+        parcel.writeString(deviceAddress);
+        parcel.writeString(identificationName);
+        parcel.writeString(joinTime);
+        parcel.writeByte((byte) (isOnline ? 1 : 0));
+        parcel.writeParcelable(bluetoothDevice, i);
     }
 }

@@ -8,10 +8,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatCallback;
-import android.support.v7.app.AppCompatDelegate;
-import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.AdapterView;
@@ -26,8 +22,6 @@ import com.vise.basebluetooth.receiver.ScanBroadcastReceiver;
 import com.vise.basebluetooth.utils.BluetoothUtil;
 import com.vise.bluetoothchat.R;
 import com.vise.bluetoothchat.adapter.AddFriendAdapter;
-import com.vise.common_base.activity.BaseActivity;
-import com.vise.common_base.manager.AppManager;
 import com.vise.common_base.utils.ToastUtil;
 import com.vise.common_utils.log.LogUtils;
 
@@ -43,7 +37,7 @@ import java.util.Map;
  * @author: <a href="http://www.xiaoyaoyou1212.com">DAWI</a>
  * @date: 2016-09-20 15:18
  */
-public class AddFriendActivity extends BaseActivity implements AppCompatCallback {
+public class AddFriendActivity extends BaseChatActivity {
 
     private ProgressBar mScanPb;
     private ListView mAddFriendLv;
@@ -108,12 +102,11 @@ public class AddFriendActivity extends BaseActivity implements AppCompatCallback
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        AppManager.getAppManager().addActivity(this);
         setContentView(R.layout.activity_add_friend);
-        init();
     }
 
-    private void init() {
+    @Override
+    protected void initWidget() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         ((TextView)findViewById(R.id.title)).setText(getString(R.string.add_friend));
@@ -121,9 +114,17 @@ public class AddFriendActivity extends BaseActivity implements AppCompatCallback
         mProgressDialog = new ProgressDialog(mContext);
         mScanPb = (ProgressBar) findViewById(R.id.add_friend_scan_progress);
         mAddFriendLv = (ListView) findViewById(R.id.add_friend_scan_list);
+    }
+
+    @Override
+    protected void initData() {
         mAdapter = new AddFriendAdapter(mContext);
         mAddFriendLv.setAdapter(mAdapter);
+        beginDiscover();
+    }
 
+    @Override
+    protected void initEvent() {
         mAddFriendLv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -152,7 +153,6 @@ public class AddFriendActivity extends BaseActivity implements AppCompatCallback
                 }
             }
         });
-        beginDiscover();
     }
 
     private void beginDiscover(){
@@ -175,24 +175,6 @@ public class AddFriendActivity extends BaseActivity implements AppCompatCallback
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
         registerReceiver(mPairBroadcastReceiver, intentFilter);
-    }
-
-    public void setSupportActionBar(@Nullable Toolbar toolbar) {
-        AppCompatDelegate.create(this, this).setSupportActionBar(toolbar);
-    }
-
-    @Override
-    public void onSupportActionModeStarted(ActionMode mode) {
-    }
-
-    @Override
-    public void onSupportActionModeFinished(ActionMode mode) {
-    }
-
-    @Nullable
-    @Override
-    public ActionMode onWindowStartingSupportActionMode(ActionMode.Callback callback) {
-        return null;
     }
 
     @Override

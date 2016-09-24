@@ -8,15 +8,11 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatCallback;
-import android.support.v7.app.AppCompatDelegate;
-import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
@@ -34,66 +30,35 @@ import com.vise.basebluetooth.mode.BaseMessage;
 import com.vise.basebluetooth.utils.BluetoothUtil;
 import com.vise.bluetoothchat.R;
 import com.vise.bluetoothchat.adapter.GroupFriendAdapter;
+import com.vise.bluetoothchat.common.AppConstant;
 import com.vise.bluetoothchat.mode.FriendInfo;
 import com.vise.bluetoothchat.mode.GroupInfo;
-import com.vise.common_base.activity.BaseActivity;
 import com.vise.common_base.manager.AppManager;
 import com.vise.common_base.utils.ToastUtil;
 import com.vise.common_utils.log.LogUtils;
 import com.vise.common_utils.utils.character.DateTime;
+import com.vise.common_utils.utils.view.ActivityUtil;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-public class MainActivity extends BaseActivity
-        implements AppCompatCallback,NavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends BaseChatActivity
+        implements NavigationView.OnNavigationItemSelectedListener {
 
-    private ProgressDialog mProgressDialog;
     private ExpandableListView mGroupFriendLv;
     private GroupFriendAdapter mGroupFriendAdapter;
     private List<GroupInfo> mGroupFriendListData = new ArrayList<>();
-    private BluetoothChatHelper mBluetoothChatHelper;
-
-    private IChatCallback<BaseMessage> chatCallback = new IChatCallback<BaseMessage>() {
-        @Override
-        public void connectStateChange(State state) {
-            LogUtils.i("connectStateChange:"+state.getCode());
-            if(state == State.STATE_CONNECTED){
-                mProgressDialog.hide();
-                ToastUtil.showToast(mContext, getString(R.string.connect_friend_success));
-            }
-        }
-
-        @Override
-        public void writeData(BaseMessage data, int type) {
-            LogUtils.i("writeData:"+data.toString());
-        }
-
-        @Override
-        public void readData(BaseMessage data, int type) {
-            LogUtils.i("readData:"+data.toString());
-        }
-
-        @Override
-        public void setDeviceName(String name) {
-            LogUtils.i("setDeviceName:"+name);
-        }
-
-        @Override
-        public void showMessage(String message, int code) {
-            LogUtils.i("showMessage:"+message);
-            mProgressDialog.hide();
-            ToastUtil.showToast(mContext, getString(R.string.connect_friend_fail));
-        }
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        AppManager.getAppManager().addActivity(this);
         setContentView(R.layout.activity_main);
+    }
+
+    @Override
+    protected void initWidget() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -101,8 +66,7 @@ public class MainActivity extends BaseActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(mContext, AddFriendActivity.class);
-                startActivity(intent);
+                ActivityUtil.startForwardActivity(MainActivity.this, AddFriendActivity.class);
             }
         });
 
@@ -115,26 +79,15 @@ public class MainActivity extends BaseActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        mProgressDialog = new ProgressDialog(mContext);
         mGroupFriendLv = (ExpandableListView) findViewById(R.id.friend_group_list);
-        initData();
     }
 
-    private void initData() {
+    @Override
+    protected void initData() {
         mGroupFriendAdapter = new GroupFriendAdapter(mContext, mGroupFriendListData);
         mGroupFriendLv.setAdapter(mGroupFriendAdapter);
         mGroupFriendLv.expandGroup(0);
-        mGroupFriendLv.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
-            @Override
-            public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
-                mProgressDialog.setMessage(getString(R.string.connect_friend_loading));
-                mProgressDialog.show();
-                mBluetoothChatHelper.connect(mGroupFriendListData.get(groupPosition).getFriendList().get(childPosition).getBluetoothDevice(), false);
-                return true;
-            }
-        });
 
-        mBluetoothChatHelper = new BluetoothChatHelper(chatCallback);
         if(BluetoothUtil.isSupportBle(mContext)){
             BluetoothUtil.enableBluetooth((Activity) mContext, 1);
         } else{
@@ -146,6 +99,20 @@ public class MainActivity extends BaseActivity
                 }
             }, 3000);
         }
+    }
+
+    @Override
+    protected void initEvent() {
+        mGroupFriendLv.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
+            @Override
+            public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
+                FriendInfo friendInfo = mGroupFriendListData.get(groupPosition).getFriendList().get(childPosition);
+                Bundle bundle = new Bundle();
+                bundle.putParcelable(AppConstant.FRIEND_INFO, friendInfo);
+                ActivityUtil.startForwardActivity(MainActivity.this, ChatActivity.class, bundle, false);
+                return true;
+            }
+        });
     }
 
     @Override
@@ -237,24 +204,6 @@ public class MainActivity extends BaseActivity
         return true;
     }
 
-    public void setSupportActionBar(@Nullable Toolbar toolbar) {
-        AppCompatDelegate.create(this, this).setSupportActionBar(toolbar);
-    }
-
-    @Override
-    public void onSupportActionModeStarted(ActionMode mode) {
-    }
-
-    @Override
-    public void onSupportActionModeFinished(ActionMode mode) {
-    }
-
-    @Nullable
-    @Override
-    public ActionMode onWindowStartingSupportActionMode(ActionMode.Callback callback) {
-        return null;
-    }
-
     private void displayAboutDialog() {
         final int paddingSizeDp = 5;
         final float scale = getResources().getDisplayMetrics().density;
@@ -300,7 +249,6 @@ public class MainActivity extends BaseActivity
             mGroupFriendListData.add(groupInfo);
             mGroupFriendAdapter.setGroupInfoList(mGroupFriendListData);
         }
-        mBluetoothChatHelper.start(false);
     }
 
 }

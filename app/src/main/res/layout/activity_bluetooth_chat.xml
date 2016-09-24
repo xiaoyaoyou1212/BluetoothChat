@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        app:popupTheme="@style/AppTheme.PopupOverlay">
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:textSize="@dimen/textSize18"
+            android:textColor="@color/common_white"
+            />
+    </android.support.v7.widget.Toolbar>
+
+    <ListView
+        android:id="@+id/chat_msg_show_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_below="@+id/toolbar"
+        android:layout_above="@+id/chat_msg_rel"
+        android:overScrollMode="never"
+        android:scrollbars="none"
+        android:background="@mipmap/theme_bg_pink"
+        />
+
+    <RelativeLayout
+        android:id="@+id/chat_msg_rel"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dimens48"
+        android:layout_alignParentBottom="true">
+        <ImageButton
+            android:id="@+id/chat_msg_add"
+            android:layout_width="@dimen/dimens48"
+            android:layout_height="@dimen/dimens48"
+            android:layout_alignParentLeft="true"
+            android:src="@android:drawable/ic_menu_add"/>
+        <EditText
+            android:id="@+id/chat_msg_edit"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_centerInParent="true"
+            android:layout_toRightOf="@+id/chat_msg_add"
+            android:layout_toLeftOf="@+id/chat_msg_send"
+            />
+        <ImageButton
+            android:id="@+id/chat_msg_send"
+            android:layout_width="@dimen/dimens48"
+            android:layout_height="match_parent"
+            android:layout_alignParentRight="true"
+            android:src="@android:drawable/ic_menu_send"/>
+    </RelativeLayout>
+</RelativeLayout>

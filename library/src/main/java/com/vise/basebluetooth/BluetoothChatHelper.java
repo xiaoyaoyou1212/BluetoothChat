@@ -28,7 +28,7 @@ public class BluetoothChatHelper {
     private ConnectThread mConnectThread;
     private ConnectedThread mConnectedThread;
     private State mState;
-    private IChatCallback<BaseMessage> mChatCallback;
+    private IChatCallback<byte[]> mChatCallback;
 
     private final Handler mHandler = new Handler(Looper.getMainLooper()) {
         @Override
@@ -44,12 +44,12 @@ public class BluetoothChatHelper {
                     break;
                 case ChatConstant.MESSAGE_WRITE:
                     if (mChatCallback != null) {
-                        mChatCallback.writeData((BaseMessage) msg.obj, 0);
+                        mChatCallback.writeData((byte[]) msg.obj, 0);
                     }
                     break;
                 case ChatConstant.MESSAGE_READ:
                     if (mChatCallback != null) {
-                        mChatCallback.readData((BaseMessage) msg.obj, 0);
+                        mChatCallback.readData((byte[]) msg.obj, 0);
                     }
                     break;
                 case ChatConstant.MESSAGE_DEVICE_NAME:
@@ -66,7 +66,7 @@ public class BluetoothChatHelper {
         }
     };
 
-    public BluetoothChatHelper(IChatCallback<BaseMessage> chatCallback) {
+    public BluetoothChatHelper(IChatCallback<byte[]> chatCallback) {
         mAdapter = BluetoothAdapter.getDefaultAdapter();
         mState = State.STATE_NONE;
         this.mChatCallback = chatCallback;

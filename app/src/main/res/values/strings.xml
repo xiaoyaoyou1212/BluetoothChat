@@ -21,6 +21,7 @@
     <string name="connect_friend_loading">与好友连接中...</string>
     <string name="connect_friend_fail">连接失败！</string>
     <string name="connect_friend_success">连接成功！</string>
+    <string name="send_msg_isEmpty">消息为空，请先输入要发送的消息！</string>
 
     <string name="phone_not_support_bluetooth">该手机不支持蓝牙功能，3秒后应用将自动退出！</string>
 
