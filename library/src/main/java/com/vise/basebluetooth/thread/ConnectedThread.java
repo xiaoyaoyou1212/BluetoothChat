@@ -17,7 +17,7 @@ import java.io.OutputStream;
  */
 public class ConnectedThread extends Thread {
 
-    private BluetoothChatHelper mHelper;
+    private final BluetoothChatHelper mHelper;
     private final BluetoothSocket mSocket;
     private final InputStream mInStream;
     private final OutputStream mOutStream;
@@ -42,25 +42,21 @@ public class ConnectedThread extends Thread {
 
     public void run() {
         BleLog.i("BEGIN mConnectedThread");
-        int count = 0;
-        int haveCheck = 0;
         int bytes;
-        try{
-            // 如果在网络传输中数据没有完全传递，则方法返回0
-            while (count == 0) {
-                count = mInStream.available();
-                haveCheck++;
-                if (haveCheck >= 50)
-                    return;
+        byte[] buffer = new byte[1024];
+
+        // Keep listening to the InputStream while connected
+        while (true) {
+            try {
+                bytes = mInStream.read(buffer);
+                byte[] data = new byte[bytes];
+                System.arraycopy(buffer, 0, data, 0, data.length);
+                mHelper.getHandler().obtainMessage(ChatConstant.MESSAGE_READ, bytes, -1, data).sendToTarget();
+            } catch (IOException e) {
+                BleLog.e("disconnected", e);
+                mHelper.start(false);
+                break;
             }
-            byte[] buffer = new byte[count];
-            bytes = mInStream.read(buffer);
-            mHelper.getHandler().obtainMessage(ChatConstant.MESSAGE_READ, bytes, -1, buffer).sendToTarget();
-        }catch (IOException e){
-            BleLog.e("disconnected", e);
-            mHelper.connectionLost();
-            this.start();
-            return;
         }
     }
 

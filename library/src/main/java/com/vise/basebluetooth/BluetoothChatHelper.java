@@ -166,6 +166,11 @@ public class BluetoothChatHelper {
             mConnectedThread = null;
         }
 
+        if (mAcceptThread != null){
+            mAcceptThread.cancel();
+            mAcceptThread = null;
+        }
+
         mConnectedThread = new ConnectedThread(this, socket, socketType);
         mConnectedThread.start();
 

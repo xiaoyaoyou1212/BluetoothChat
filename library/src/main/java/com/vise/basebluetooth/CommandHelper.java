@@ -54,7 +54,7 @@ public class CommandHelper {
                 message = new BaseMessage();
                 int dataLength = ConvertUtil.bytesToIntHigh(new byte[]{data[1], data[2]}, 0);
                 byte[] msgData = new byte[dataLength];
-                System.arraycopy(data, 4, msgData, 0, dataLength);
+                System.arraycopy(data, 5, msgData, 0, dataLength);
                 if(msgData.length < 1) {
                     return message;
                 }
