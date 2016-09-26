@@ -65,14 +65,14 @@ public class CommandHelper {
                 message = new FileMessage();
                 int dataLength = ConvertUtil.bytesToIntHigh(new byte[]{data[1], data[2]}, 0);
                 byte[] fileInfoData = new byte[dataLength];
-                System.arraycopy(data, 4, fileInfoData, 0, dataLength);
+                System.arraycopy(data, 5, fileInfoData, 0, dataLength);
                 if(fileInfoData.length < 7){
                     return message;
                 }
                 byte[] fileLength = new byte[]{fileInfoData[0], fileInfoData[1], fileInfoData[2], fileInfoData[3]};
                 byte[] fileNameLength = new byte[]{fileInfoData[4], fileInfoData[5]};
                 byte[] fileName = new byte[fileInfoData.length - 6];
-                System.arraycopy(fileInfoData, 5, fileName, 0, fileName.length);
+                System.arraycopy(fileInfoData, 6, fileName, 0, fileName.length);
                 message.setMsgType(ChatConstant.VISE_COMMAND_TYPE_FILE);
                 ((FileMessage)message).setFileLength(ConvertUtil.bytesToIntHigh(fileLength, 4));
                 ((FileMessage)message).setFileName(new String(fileName));
