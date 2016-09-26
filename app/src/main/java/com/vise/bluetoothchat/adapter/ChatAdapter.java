@@ -3,6 +3,8 @@ package com.vise.bluetoothchat.adapter;
 import android.content.Context;
 import android.widget.TextView;
 
+import com.vise.basebluetooth.common.ChatConstant;
+import com.vise.basebluetooth.mode.FileMessage;
 import com.vise.bluetoothchat.R;
 import com.vise.bluetoothchat.mode.ChatInfo;
 import com.vise.common_base.adapter.helper.HelperAdapter;
@@ -25,20 +27,27 @@ public class ChatAdapter extends HelperAdapter<ChatInfo> {
         }
         TextView timeTv;
         TextView msgTv;
+        TextView nameTv;
         if(chatInfo.isSend()){
             timeTv = viewHolder.getView(R.id.item_chat_right_time);
             msgTv = viewHolder.getView(R.id.item_chat_right_msg);
-            if(chatInfo.getMessage() != null) {
-                timeTv.setText(chatInfo.getSendTime());
-                msgTv.setText(chatInfo.getMessage().getMsgContent());
-            }
+            nameTv = viewHolder.getView(R.id.item_chat_right_name);
+            timeTv.setText(chatInfo.getSendTime());
         } else{
             timeTv = viewHolder.getView(R.id.item_chat_left_time);
             msgTv = viewHolder.getView(R.id.item_chat_left_msg);
-            if(chatInfo.getMessage() != null) {
-                timeTv.setText(chatInfo.getReceiveTime());
+            nameTv = viewHolder.getView(R.id.item_chat_left_name);
+            timeTv.setText(chatInfo.getReceiveTime());
+        }
+        if(chatInfo.getMessage() != null){
+            if(chatInfo.getMessage().getMsgType() == ChatConstant.VISE_COMMAND_TYPE_FILE){
+                msgTv.setText("接收文件:"+((FileMessage)chatInfo.getMessage()).getFileName());
+            } else{
                 msgTv.setText(chatInfo.getMessage().getMsgContent());
             }
+        }
+        if(chatInfo.getFriendInfo() != null){
+            nameTv.setText(chatInfo.getFriendInfo().getFriendNickName());
         }
     }
 

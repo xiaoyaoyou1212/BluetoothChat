@@ -29,6 +29,8 @@
         android:layout_centerInParent="true"
         android:layout_below="@+id/toolbar"
         android:layout_above="@+id/chat_msg_rel"
+        android:stackFromBottom="true"
+        android:transcriptMode="alwaysScroll"
         android:overScrollMode="never"
         android:scrollbars="none"
         android:background="@mipmap/theme_bg_pink"
