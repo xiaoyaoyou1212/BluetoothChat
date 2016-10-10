@@ -178,7 +178,7 @@ public class ChatActivity extends BaseChatActivity {
                         mIsSendFile = true;
                         mFilePath = currentPath;
                         mSendFile = new File(mFilePath);
-                        mMsgEditEt.setText("发送文件:"+currentPath);
+                        mMsgEditEt.setText(mSendFile.getName());
                     }
                 });
                 picker.show();
@@ -228,9 +228,9 @@ public class ChatActivity extends BaseChatActivity {
             message.setMsgLength(mMsgEditEt.getText().length());
             if(mSendFile != null){
                 ((FileMessage)message).setFileLength((int) mSendFile.length());
+                ((FileMessage)message).setFileName(mSendFile.getName());
             }
             if(mFilePath != null){
-                ((FileMessage)message).setFileName(mFilePath);
                 ((FileMessage)message).setFileNameLength(mFilePath.length());
             }
         } else{

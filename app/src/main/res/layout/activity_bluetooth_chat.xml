@@ -28,7 +28,7 @@
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:layout_below="@+id/toolbar"
-        android:layout_above="@+id/chat_msg_rel"
+        android:layout_above="@+id/chat_msg_lin"
         android:stackFromBottom="true"
         android:transcriptMode="alwaysScroll"
         android:overScrollMode="never"
@@ -36,30 +36,41 @@
         android:background="@mipmap/theme_bg_pink"
         />
 
-    <RelativeLayout
-        android:id="@+id/chat_msg_rel"
+    <LinearLayout
+        android:id="@+id/chat_msg_lin"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/dimens48"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
         android:layout_alignParentBottom="true">
-        <ImageButton
-            android:id="@+id/chat_msg_add"
-            android:layout_width="@dimen/dimens48"
-            android:layout_height="@dimen/dimens48"
-            android:layout_alignParentLeft="true"
-            android:src="@android:drawable/ic_menu_add"/>
-        <EditText
-            android:id="@+id/chat_msg_edit"
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_centerInParent="true"
-            android:layout_toRightOf="@+id/chat_msg_add"
-            android:layout_toLeftOf="@+id/chat_msg_send"
+            android:layout_height="@dimen/dimens48">
+            <ImageButton
+                android:id="@+id/chat_msg_add"
+                android:layout_width="@dimen/dimens48"
+                android:layout_height="@dimen/dimens48"
+                android:layout_alignParentLeft="true"
+                android:src="@android:drawable/ic_menu_add"/>
+            <EditText
+                android:id="@+id/chat_msg_edit"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_centerInParent="true"
+                android:layout_toRightOf="@+id/chat_msg_add"
+                android:layout_toLeftOf="@+id/chat_msg_send"
+                />
+            <ImageButton
+                android:id="@+id/chat_msg_send"
+                android:layout_width="@dimen/dimens48"
+                android:layout_height="match_parent"
+                android:layout_alignParentRight="true"
+                android:src="@android:drawable/ic_menu_send"/>
+        </RelativeLayout>
+        <fragment
+            android:id="@+id/chat_emojicons"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            class="com.rockerhieu.emojicon.EmojiconsFragment"
             />
-        <ImageButton
-            android:id="@+id/chat_msg_send"
-            android:layout_width="@dimen/dimens48"
-            android:layout_height="match_parent"
-            android:layout_alignParentRight="true"
-            android:src="@android:drawable/ic_menu_send"/>
-    </RelativeLayout>
+    </LinearLayout>
 </RelativeLayout>

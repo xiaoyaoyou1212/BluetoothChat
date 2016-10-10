@@ -41,7 +41,11 @@ public class ChatAdapter extends HelperAdapter<ChatInfo> {
         }
         if(chatInfo.getMessage() != null){
             if(chatInfo.getMessage().getMsgType() == ChatConstant.VISE_COMMAND_TYPE_FILE){
-                msgTv.setText("接收文件:"+((FileMessage)chatInfo.getMessage()).getFileName());
+                if(chatInfo.isSend()){
+                    msgTv.setText("发送文件："+((FileMessage)chatInfo.getMessage()).getFileName());
+                } else{
+                    msgTv.setText("接收文件："+((FileMessage)chatInfo.getMessage()).getFileName());
+                }
             } else{
                 msgTv.setText(chatInfo.getMessage().getMsgContent());
             }

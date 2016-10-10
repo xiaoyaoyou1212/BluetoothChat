@@ -10,28 +10,30 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         />
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="right"
-        android:orientation="horizontal">
-        <TextView
-            android:id="@+id/item_chat_right_msg"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:background="@drawable/outgoing"
-            android:minHeight="@dimen/dimens48"
-            />
+        android:layout_marginTop="@dimen/dimens10"
+        >
         <ImageView
             android:id="@+id/item_chat_right_icon"
             android:layout_width="@dimen/dimens48"
             android:layout_height="@dimen/dimens48"
             android:layout_marginLeft="@dimen/dimens10"
-            android:layout_gravity="bottom"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true"
             android:src="@mipmap/ic_launcher"
             />
-    </LinearLayout>
+        <TextView
+            android:id="@+id/item_chat_right_msg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@+id/item_chat_right_icon"
+            android:gravity="center_vertical"
+            android:background="@drawable/outgoing"
+            android:minHeight="@dimen/dimens48"
+            />
+    </RelativeLayout>
     <TextView
         android:id="@+id/item_chat_right_name"
         android:layout_width="wrap_content"
