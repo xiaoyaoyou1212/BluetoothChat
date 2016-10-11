@@ -2,6 +2,7 @@ package com.vise.bluetoothchat.activity;
 
 import android.app.ProgressDialog;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -9,11 +10,16 @@ import android.os.Handler;
 import android.os.Looper;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.rockerhieu.emojicon.EmojiconGridFragment;
+import com.rockerhieu.emojicon.EmojiconsFragment;
+import com.rockerhieu.emojicon.emoji.Emojicon;
 import com.vise.basebluetooth.BluetoothChatHelper;
 import com.vise.basebluetooth.CommandHelper;
 import com.vise.basebluetooth.callback.IChatCallback;
@@ -30,6 +36,7 @@ import com.vise.bluetoothchat.mode.FriendInfo;
 import com.vise.common_base.utils.ToastUtil;
 import com.vise.common_utils.log.LogUtils;
 import com.vise.common_utils.utils.character.DateTime;
+import com.vise.common_utils.utils.view.ViewUtil;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
@@ -45,13 +52,16 @@ import cn.qqtheme.framework.util.StorageUtils;
  * @author: <a href="http://www.xiaoyaoyou1212.com">DAWI</a>
  * @date: 16/9/24 16:26.
  */
-public class ChatActivity extends BaseChatActivity {
+public class ChatActivity extends BaseChatActivity implements EmojiconsFragment.OnEmojiconBackspaceClickedListener,
+        EmojiconGridFragment.OnEmojiconClickedListener {
 
     private TextView mTitleTv;
     private ListView mChatMsgLv;
+    private ImageButton mMsgFaceIb;
     private ImageButton mMsgAddIb;
     private EditText mMsgEditEt;
     private ImageButton mMsgSendIb;
+    private FrameLayout mEmojiconFl;
     private ProgressDialog mProgressDialog;
     private ChatAdapter mChatAdapter;
     private FriendInfo mFriendInfo;
@@ -131,9 +141,11 @@ public class ChatActivity extends BaseChatActivity {
         setSupportActionBar(toolbar);
         mTitleTv = (TextView) findViewById(R.id.title);
         mChatMsgLv = (ListView) findViewById(R.id.chat_msg_show_list);
+        mMsgFaceIb = (ImageButton) findViewById(R.id.chat_msg_face);
         mMsgAddIb = (ImageButton) findViewById(R.id.chat_msg_add);
         mMsgEditEt = (EditText) findViewById(R.id.chat_msg_edit);
         mMsgSendIb = (ImageButton) findViewById(R.id.chat_msg_send);
+        mEmojiconFl = (FrameLayout) findViewById(R.id.chat_emojicons);
         mProgressDialog = new ProgressDialog(mContext);
     }
 
@@ -166,6 +178,23 @@ public class ChatActivity extends BaseChatActivity {
 
     @Override
     protected void initEvent() {
+        mMsgFaceIb.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(mEmojiconFl.getVisibility() == View.GONE){
+                    hideSoftInput();
+                    new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            mEmojiconFl.setVisibility(View.VISIBLE);
+                            setEmojiconFragment(false);
+                        }
+                    }, 100);
+                } else{
+                    mEmojiconFl.setVisibility(View.GONE);
+                }
+            }
+        });
         mMsgAddIb.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -192,6 +221,12 @@ public class ChatActivity extends BaseChatActivity {
                 } else{
                     ToastUtil.showToast(mContext, getString(R.string.send_msg_isEmpty));
                 }
+            }
+        });
+        mMsgEditEt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mEmojiconFl.setVisibility(View.GONE);
             }
         });
     }
@@ -273,5 +308,27 @@ public class ChatActivity extends BaseChatActivity {
             mBluetoothChatHelper = null;
         }
         super.onDestroy();
+    }
+
+    private void hideSoftInput(){
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(getWindow().getDecorView().getWindowToken(), 0);
+    }
+
+    private void setEmojiconFragment(boolean useSystemDefault) {
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.chat_emojicons, EmojiconsFragment.newInstance(useSystemDefault))
+                .commit();
+    }
+
+    @Override
+    public void onEmojiconBackspaceClicked(View v) {
+        EmojiconsFragment.backspace(mMsgEditEt);
+    }
+
+    @Override
+    public void onEmojiconClicked(Emojicon emojicon) {
+        EmojiconsFragment.input(mMsgEditEt, emojicon);
     }
 }

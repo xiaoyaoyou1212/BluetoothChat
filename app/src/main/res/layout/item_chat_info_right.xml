@@ -22,7 +22,7 @@
             android:layout_marginLeft="@dimen/dimens10"
             android:layout_alignParentRight="true"
             android:layout_alignParentBottom="true"
-            android:src="@mipmap/ic_launcher"
+            android:src="@mipmap/default_head"
             />
         <TextView
             android:id="@+id/item_chat_right_msg"

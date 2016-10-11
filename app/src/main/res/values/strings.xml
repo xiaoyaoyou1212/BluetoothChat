@@ -5,6 +5,8 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
     <!-- Menu items -->
+    <string name="menu_author">逍遥游</string>
+    <string name="menu_website">http://www.xiaoyaoyou1212.com</string>
     <string name="menu_about">关于</string>
     <string name="menu_share">分享</string>
 

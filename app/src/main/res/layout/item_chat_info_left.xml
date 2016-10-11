@@ -20,7 +20,7 @@
             android:layout_width="@dimen/dimens48"
             android:layout_height="@dimen/dimens48"
             android:layout_gravity="bottom"
-            android:src="@mipmap/ic_launcher"
+            android:src="@mipmap/default_head"
             />
         <TextView
             android:id="@+id/item_chat_left_msg"

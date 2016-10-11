@@ -46,11 +46,17 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/dimens48">
             <ImageButton
-                android:id="@+id/chat_msg_add"
+                android:id="@+id/chat_msg_face"
                 android:layout_width="@dimen/dimens48"
                 android:layout_height="@dimen/dimens48"
                 android:layout_alignParentLeft="true"
-                android:src="@android:drawable/ic_menu_add"/>
+                android:src="@mipmap/icon_face_normal"/>
+            <ImageButton
+                android:id="@+id/chat_msg_add"
+                android:layout_width="@dimen/dimens48"
+                android:layout_height="@dimen/dimens48"
+                android:layout_toRightOf="@+id/chat_msg_face"
+                android:src="@mipmap/icon_more_normal"/>
             <EditText
                 android:id="@+id/chat_msg_edit"
                 android:layout_width="match_parent"
@@ -66,11 +72,11 @@
                 android:layout_alignParentRight="true"
                 android:src="@android:drawable/ic_menu_send"/>
         </RelativeLayout>
-        <fragment
+        <FrameLayout
             android:id="@+id/chat_emojicons"
             android:layout_width="match_parent"
             android:layout_height="200dp"
-            class="com.rockerhieu.emojicon.EmojiconsFragment"
+            android:visibility="gone"
             />
     </LinearLayout>
 </RelativeLayout>

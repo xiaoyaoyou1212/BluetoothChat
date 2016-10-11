@@ -10,9 +10,9 @@
     <ImageView
         android:id="@+id/item_friend_icon"
         android:layout_width="0dp"
-        android:layout_height="match_parent"
+        android:layout_height="@dimen/dimens48"
         android:layout_weight="1"
-        android:src="@mipmap/ic_launcher"/>
+        android:src="@mipmap/default_head"/>
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="match_parent"
