@@ -36,7 +36,6 @@ import com.vise.bluetoothchat.mode.FriendInfo;
 import com.vise.common_base.utils.ToastUtil;
 import com.vise.common_utils.log.LogUtils;
 import com.vise.common_utils.utils.character.DateTime;
-import com.vise.common_utils.utils.view.ViewUtil;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
@@ -76,7 +75,12 @@ public class ChatActivity extends BaseChatActivity implements EmojiconsFragment.
         public void connectStateChange(State state) {
             LogUtils.i("connectStateChange:"+state.getCode());
             if(state == State.STATE_CONNECTED){
-                mProgressDialog.hide();
+                if (mProgressDialog != null) {
+                    mProgressDialog.hide();
+                }
+                if(mFriendInfo != null){
+                    mTitleTv.setText(mFriendInfo.getFriendNickName()+"("+getString(R.string.device_online)+")");
+                }
                 ToastUtil.showToast(mContext, getString(R.string.connect_friend_success));
             }
         }
