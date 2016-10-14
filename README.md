@@ -114,6 +114,7 @@ public class ScanBroadcastReceiver extends BroadcastReceiver {
 ```
 搜索好友示例图：
 ![添加好友](http://img.blog.csdn.net/20161013141724366)
+
 ```
 public class PairBroadcastReceiver extends BroadcastReceiver {
 
