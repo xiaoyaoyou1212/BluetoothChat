@@ -204,7 +204,7 @@ public class ChatActivity extends BaseChatActivity implements EmojiconsFragment.
             public void onClick(View view) {
                 FilePicker picker = new FilePicker(ChatActivity.this, FilePicker.FILE);
                 picker.setShowHideDir(false);
-                picker.setRootPath(StorageUtils.getRootPath(ChatActivity.this));
+                picker.setRootPath(StorageUtils.getInternalRootPath(ChatActivity.this));
                 picker.setOnFilePickListener(new FilePicker.OnFilePickListener() {
                     @Override
                     public void onFilePicked(String currentPath) {
