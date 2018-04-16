@@ -6,7 +6,10 @@
 
 ### QQ交流群
 
-![QQ群](http://img.blog.csdn.net/20170327191310083)
+![QQ群](https://github.com/xiaoyaoyou1212/XSnow/blob/master/screenshot/qq_chat_first.png)
+(此群已满)
+
+![QQ群](https://github.com/xiaoyaoyou1212/XSnow/blob/master/screenshot/qq_chat_second.png)
 
 ### 前景
 
